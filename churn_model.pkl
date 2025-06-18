@@ -1,0 +1,41 @@
+# Import necessary libraries
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.preprocessing import LabelEncoder
+import pickle
+
+# Load your dataset (replace with your actual CSV or DataFrame)
+df = pd.read_csv("customer_churn_data.csv")  # replace with your path
+
+# Example preprocessing
+# Drop unnecessary columns
+df.drop(columns=["customerID"], inplace=True)
+
+# Encode categorical variables
+label_encoders = {}
+for column in df.select_dtypes(include='object').columns:
+    le = LabelEncoder()
+    df[column] = le.fit_transform(df[column])
+    label_encoders[column] = le  # save the encoder
+
+# Features and Target
+X = df.drop("Churn", axis=1)
+y = df["Churn"]
+
+# Train/Test split
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Model training
+model = RandomForestClassifier()
+model.fit(X_train, y_train)
+
+# Save the model
+with open("model.pkl", "wb") as model_file:
+    pickle.dump(model, model_file)
+
+# Save the encoders if needed (optional)
+with open("label_encoders.pkl", "wb") as le_file:
+    pickle.dump(label_encoders, le_file)
+
+print("✅ Model and encoders saved successfully.")
